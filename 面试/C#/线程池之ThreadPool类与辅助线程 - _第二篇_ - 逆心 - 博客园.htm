@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)http://www.cnblogs.com/kissdodog/archive/2013/03/28/2986026.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>线程池之ThreadPool类与辅助线程 - &lt;第二篇&gt; - 逆心 - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/bundle-BlackSun.css">
+<link id="mobile-style" media="only screen and (max-width: 768px)" type="text/css" rel="stylesheet" href="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/bundle-BlackSun-mobile.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/kissdodog/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/kissdodog/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/kissdodog/wlwmanifest.xml">
+<script async="" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/analytics.js"></script><script type="text/javascript" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/encoder.js"></script><script src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/jquery.js" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'kissdodog', cb_enable_mathjax=false;var isLogined=false;</script>
+<script src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/blog-common.js" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+
+<div id="top">
+	
+<div>
+	<table class="HeaderTitles">
+		<tbody><tr>
+			<td>
+				<h1 class="HeaderTitle"><a id="Header1_HeaderTitle" class="HeaderMainTitle" href="http://www.cnblogs.com/kissdodog/">逆心</a></h1>
+				<p id="tagline">船停在港湾是很安全的，但那不是造船的目的！</p>
+			</td>
+		</tr>
+	</tbody></table>
+</div>
+<div>
+	<table id="HeaderBar" class="HeaderBar">
+		<tbody><tr>
+			<td class="HeaderBarTab" nowrap="">
+				
+&nbsp;
+<a id="blog_nav_sitehome" href="http://www.cnblogs.com/">博客园</a>&nbsp;::
+<a id="blog_nav_myhome" href="http://www.cnblogs.com/kissdodog/">首页</a>&nbsp;::
+<a id="blog_nav_newpost" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a>&nbsp;::
+<a id="blog_nav_contact" accesskey="9" rel="nofollow" href="https://msg.cnblogs.com/send/%E9%80%86%E5%BF%83">联系</a>&nbsp;::
+<a id="blog_nav_rss" href="http://www.cnblogs.com/kissdodog/rss">订阅</a>
+<a id="blog_nav_rss_image" class="XMLLink" href="http://www.cnblogs.com/kissdodog/rss"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/xml.gif" alt="订阅"></a>&nbsp;::
+<a id="blog_nav_admin" rel="nofollow" href="https://i.cnblogs.com/">管理</a>
+
+			</td>
+			
+			<td class="HeaderBarTabBack" nowrap="" width="100%">
+				<div id="blog_stats">
+
+	<table class="BlogStatsBar">
+		<tbody><tr>
+			<td width="100%">
+			</td>
+			<td class="BlogStatsBar" nowrap="">
+				&nbsp;
+				492 
+				Posts&nbsp;::
+				0 Stories
+				::
+				495 Comments
+				::
+				0 Trackbacks
+			</td>
+		</tr>
+	</tbody></table>
+</div>
+			</td>
+		</tr>
+	</tbody></table>
+</div>
+
+</div>
+<table id="maintable">
+	<tbody><tr><td id="leftmenu">
+	
+		
+<h3>公告</h3>
+<div class="News">
+	<div id="blog-news"><div id="profile_block">昵称：<a href="http://home.cnblogs.com/u/kissdodog/">逆心</a><br>园龄：<a href="http://home.cnblogs.com/u/kissdodog/" title="入园时间：2011-11-04">5年11个月</a><br>粉丝：<a href="http://home.cnblogs.com/u/kissdodog/followers/">1999</a><br>关注：<a href="http://home.cnblogs.com/u/kissdodog/followees/">31</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;8ec8d629-bd06-e111-b7b9-842b2b196315&#39;)">+加关注</a></div></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+		<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="http://www.cnblogs.com/kissdodog/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="http://www.cnblogs.com/kissdodog/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="http://www.cnblogs.com/kissdodog/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="http://www.cnblogs.com/kissdodog/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="http://www.cnblogs.com/kissdodog/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+
+</div></div><div id="sidebar_toptags" class="sidebar-block"></div><div id="sidebar_categories">
+<div class="mainMenuBackground">
+
+		<h3>随笔分类</h3>
+		
+				<ul>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_0" href="http://www.cnblogs.com/kissdodog/category/437242.html">.Net基础(55)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_1" href="http://www.cnblogs.com/kissdodog/category/519160.html">.Net模块：Ado.net (5)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_2" href="http://www.cnblogs.com/kissdodog/category/553597.html">.Net模块：Asp.net(6)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_3" href="http://www.cnblogs.com/kissdodog/category/464176.html">.Net模块：多线程(7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_4" href="http://www.cnblogs.com/kissdodog/category/467023.html">.Net模块：反射(3)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_5" href="http://www.cnblogs.com/kissdodog/category/468516.html">.Net模块：配置文件(7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_6" href="http://www.cnblogs.com/kissdodog/category/450785.html">C#集合(3)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_7" href="http://www.cnblogs.com/kissdodog/category/606401.html">MySQL：MySQL基础(10)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_8" href="http://www.cnblogs.com/kissdodog/category/819317.html">MySQL性能(2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_9" href="http://www.cnblogs.com/kissdodog/category/519404.html">Oracle：Oracle基础(1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_10" href="http://www.cnblogs.com/kissdodog/category/637658.html">PowerDesigner熟悉(2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_11" href="http://www.cnblogs.com/kissdodog/category/491903.html">SQLServer：T-SQL语法(11)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_12" href="http://www.cnblogs.com/kissdodog/category/525064.html">SQLServer：查询反模式(5)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_13" href="http://www.cnblogs.com/kissdodog/category/534292.html">SQLServer：存储过程重编译(2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_14" href="http://www.cnblogs.com/kissdodog/category/457131.html">SQLServer：基础(18)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_15" href="http://www.cnblogs.com/kissdodog/category/525801.html">SQLServer：开发反模式(3)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_16" href="http://www.cnblogs.com/kissdodog/category/488819.html">SQLServer：索引(13)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_17" href="http://www.cnblogs.com/kissdodog/category/531084.html">SQLServer：统计分析(5)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_18" href="http://www.cnblogs.com/kissdodog/category/490053.html">SQLServer：系统函数(6)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_19" href="http://www.cnblogs.com/kissdodog/category/529319.html">SQLServer：性能优化(8)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_20" href="http://www.cnblogs.com/kissdodog/category/491914.html">SQLServer：语句(8)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_21" href="http://www.cnblogs.com/kissdodog/category/532309.html">SQLServer：执行计划(5)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_22" href="http://www.cnblogs.com/kissdodog/category/454370.html">XML：XML学习(7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_23" href="http://www.cnblogs.com/kissdodog/category/580666.html">测试：LoadRunner(4)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_24" href="http://www.cnblogs.com/kissdodog/category/579272.html">调试：Windbg,SOS(14)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_25" href="http://www.cnblogs.com/kissdodog/category/570223.html">感悟(1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_26" href="http://www.cnblogs.com/kissdodog/category/471122.html">工具：CodeSmith(4)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_27" href="http://www.cnblogs.com/kissdodog/category/455639.html">工具：Reflector(1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_28" href="http://www.cnblogs.com/kissdodog/category/449813.html">工具：Visual Studio,SVN(6)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_29" href="http://www.cnblogs.com/kissdodog/category/471079.html">技巧(7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_30" href="http://www.cnblogs.com/kissdodog/category/537089.html">进程、线程、应用程序域(2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_31" href="http://www.cnblogs.com/kissdodog/category/443797.html">框架：Asp.net MVC(14)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_32" href="http://www.cnblogs.com/kissdodog/category/562046.html">框架：Autofac(3)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_33" href="http://www.cnblogs.com/kissdodog/category/453229.html">框架：HtmlAgilityPack HTML解析(8)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_34" href="http://www.cnblogs.com/kissdodog/category/513606.html">框架：Ibatis.Net学习(7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_35" href="http://www.cnblogs.com/kissdodog/category/449919.html">框架：Linq学习笔记(7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_36" href="http://www.cnblogs.com/kissdodog/category/564300.html">框架：Lucene.net(8)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_37" href="http://www.cnblogs.com/kissdodog/category/453550.html">框架：NHibernate(20)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_38" href="http://www.cnblogs.com/kissdodog/category/609353.html">框架：WWF(16)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_39" href="http://www.cnblogs.com/kissdodog/category/540043.html">垃圾箱(4)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_40" href="http://www.cnblogs.com/kissdodog/category/463276.html">面向对象(1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_41" href="http://www.cnblogs.com/kissdodog/category/445476.html">命名空间：System.IO(12)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_42" href="http://www.cnblogs.com/kissdodog/category/453050.html">命名空间：System.Net(1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_43" href="http://www.cnblogs.com/kissdodog/category/444361.html">命名空间：System.Web(8)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_44" href="http://www.cnblogs.com/kissdodog/category/478115.html">其他：序列化(2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_45" href="http://www.cnblogs.com/kissdodog/category/455323.html">其他：学习方法(2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_46" href="http://www.cnblogs.com/kissdodog/category/473291.html">其他：正则表达式(7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_47" href="http://www.cnblogs.com/kissdodog/category/607454.html">前端：Bootstrap(3)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_48" href="http://www.cnblogs.com/kissdodog/category/433002.html">前端：css学习笔记(8)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_49" href="http://www.cnblogs.com/kissdodog/category/436674.html">前端：HTML(6)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_50" href="http://www.cnblogs.com/kissdodog/category/438266.html">前端：javascript笔记(37)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_51" href="http://www.cnblogs.com/kissdodog/category/432436.html">前端：jQuery笔记(28)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_52" href="http://www.cnblogs.com/kissdodog/category/475231.html">前端：Json(6)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_53" href="http://www.cnblogs.com/kissdodog/category/479911.html">前端：Open Flash Chart(2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_54" href="http://www.cnblogs.com/kissdodog/category/607496.html">三大数据库差异</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_55" href="http://www.cnblogs.com/kissdodog/category/460052.html">设计模式(26)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_56" href="http://www.cnblogs.com/kissdodog/category/821009.html">数据结构(1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_57" href="http://www.cnblogs.com/kissdodog/category/484026.html">数据库设计：SQL反模式笔记(11)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_58" href="http://www.cnblogs.com/kissdodog/category/471733.html">算法：算法(4)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_59" href="http://www.cnblogs.com/kissdodog/category/465903.html">协议：HTTP(5)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_60" href="http://www.cnblogs.com/kissdodog/category/478211.html">性能：缓存(8)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_0_Link_61" href="http://www.cnblogs.com/kissdodog/category/549298.html">原理：Asp.net 原理(9)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				</ul>
+			
+	
+		<h3>随笔档案</h3>
+		
+				<ul>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_0" href="http://www.cnblogs.com/kissdodog/archive/2017/02.html">2017年2月 (1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_1" href="http://www.cnblogs.com/kissdodog/archive/2017/01.html">2017年1月 (1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_2" href="http://www.cnblogs.com/kissdodog/archive/2016/07.html">2016年7月 (5)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_3" href="http://www.cnblogs.com/kissdodog/archive/2016/05.html">2016年5月 (3)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_4" href="http://www.cnblogs.com/kissdodog/archive/2016/04.html">2016年4月 (24)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_5" href="http://www.cnblogs.com/kissdodog/archive/2015/10.html">2015年10月 (1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_6" href="http://www.cnblogs.com/kissdodog/archive/2015/07.html">2015年7月 (1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_7" href="http://www.cnblogs.com/kissdodog/archive/2015/06.html">2015年6月 (1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_8" href="http://www.cnblogs.com/kissdodog/archive/2015/02.html">2015年2月 (1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_9" href="http://www.cnblogs.com/kissdodog/archive/2015/01.html">2015年1月 (1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_10" href="http://www.cnblogs.com/kissdodog/archive/2014/12.html">2014年12月 (8)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_11" href="http://www.cnblogs.com/kissdodog/archive/2014/11.html">2014年11月 (5)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_12" href="http://www.cnblogs.com/kissdodog/archive/2014/10.html">2014年10月 (1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_13" href="http://www.cnblogs.com/kissdodog/archive/2014/09.html">2014年9月 (15)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_14" href="http://www.cnblogs.com/kissdodog/archive/2014/08.html">2014年8月 (7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_15" href="http://www.cnblogs.com/kissdodog/archive/2014/07.html">2014年7月 (1)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_16" href="http://www.cnblogs.com/kissdodog/archive/2014/06.html">2014年6月 (2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_17" href="http://www.cnblogs.com/kissdodog/archive/2014/05.html">2014年5月 (17)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_18" href="http://www.cnblogs.com/kissdodog/archive/2014/04.html">2014年4月 (9)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_19" href="http://www.cnblogs.com/kissdodog/archive/2014/03.html">2014年3月 (9)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_20" href="http://www.cnblogs.com/kissdodog/archive/2014/02.html">2014年2月 (10)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_21" href="http://www.cnblogs.com/kissdodog/archive/2014/01.html">2014年1月 (7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_22" href="http://www.cnblogs.com/kissdodog/archive/2013/12.html">2013年12月 (5)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_23" href="http://www.cnblogs.com/kissdodog/archive/2013/11.html">2013年11月 (24)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_24" href="http://www.cnblogs.com/kissdodog/archive/2013/10.html">2013年10月 (26)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_25" href="http://www.cnblogs.com/kissdodog/archive/2013/09.html">2013年9月 (26)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_26" href="http://www.cnblogs.com/kissdodog/archive/2013/08.html">2013年8月 (2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_27" href="http://www.cnblogs.com/kissdodog/archive/2013/07.html">2013年7月 (10)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_28" href="http://www.cnblogs.com/kissdodog/archive/2013/06.html">2013年6月 (42)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_29" href="http://www.cnblogs.com/kissdodog/archive/2013/05.html">2013年5月 (31)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_30" href="http://www.cnblogs.com/kissdodog/archive/2013/04.html">2013年4月 (32)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_31" href="http://www.cnblogs.com/kissdodog/archive/2013/03.html">2013年3月 (44)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_32" href="http://www.cnblogs.com/kissdodog/archive/2013/02.html">2013年2月 (30)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_33" href="http://www.cnblogs.com/kissdodog/archive/2013/01.html">2013年1月 (50)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_34" href="http://www.cnblogs.com/kissdodog/archive/2012/12.html">2012年12月 (32)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_35" href="http://www.cnblogs.com/kissdodog/archive/2012/11.html">2012年11月 (7)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				<li class="menuItemList">
+					<a id="CatList_LinkList_1_Link_36" href="http://www.cnblogs.com/kissdodog/archive/2012/10.html">2012年10月 (2)</a>
+					<span style="width:10px">
+						
+					</span> 
+				</li>
+			
+				</ul>
+			
+	
+		<h3>内容</h3>
+		
+	
+</div></div><div id="sidebar_scorerank" class="sidebar-block">
+<h3>积分与排名</h3>
+<ul>
+	<li>
+		积分 -
+		837565
+	</li><li>
+		排名 -
+		97
+	</li>
+</ul>
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<h3 class="catListTitle">最新评论</h3>
+<div class="RecentComment" id="RecentComments">
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/kissdodog/archive/2013/04/06/3002779.html#3800785">1. Re:HttpWebRequest类</a></li>
+        <li class="recent_comment_body">感谢精心整理！</li>
+        <li class="recent_comment_author">--iotmoe</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/kissdodog/archive/2013/01/16/2863515.html#3799471">2. Re:C#枚举</a></li>
+        <li class="recent_comment_body">写的太好了</li>
+        <li class="recent_comment_author">--胡正</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/kissdodog/archive/2013/01/20/2868864.html#3794413">3. Re:MemoryStream类</a></li>
+        <li class="recent_comment_body">非常感谢这么好的文章</li>
+        <li class="recent_comment_author">--Kikyo℡⁹¹⁸</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/kissdodog/archive/2013/05/11/3072832.html#3790983">4. Re:C# 结构体 struct</a></li>
+        <li class="recent_comment_body">啦啦啦</li>
+        <li class="recent_comment_author">--lyrdlc</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/kissdodog/p/3152743.html#3790489">5. Re:SQL 操作结果集 -并集、差集、交集、结果集排序</a></li>
+        <li class="recent_comment_body">好   特别是 分析 union  all</li>
+        <li class="recent_comment_author">--公子七</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<h3 class="catListTitle">阅读排行榜</h3>
+<div class="RecentComment" id="TopViewPosts"> 
+	<div id="TopViewPostsBlock"><ul><li><a href="http://www.cnblogs.com/kissdodog/archive/2012/12/15/2819025.html">1. jQuery插件之ajaxFileUpload(313128)</a></li><li><a href="http://www.cnblogs.com/kissdodog/p/4174421.html">2. MySQL 数据备份与还原(171193)</a></li><li><a href="http://www.cnblogs.com/kissdodog/archive/2013/06/03/3116284.html">3. SQL语句 - 嵌套查询(128486)</a></li><li><a href="http://www.cnblogs.com/kissdodog/p/3875992.html">4. jqGrid使用记录(101377)</a></li><li><a href="http://www.cnblogs.com/kissdodog/p/3152743.html">5. SQL 操作结果集 -并集、差集、交集、结果集排序(94771)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<h3 class="catListTitle">评论排行榜</h3>
+<div class="RecentComment" id="TopCommentsPosts">
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="http://www.cnblogs.com/kissdodog/archive/2012/12/15/2819025.html">1. jQuery插件之ajaxFileUpload(30)</a></li><li><a href="http://www.cnblogs.com/kissdodog/archive/2013/02/28/2936950.html">2. HtmlAgilityPack 之 HtmlNode类(16)</a></li><li><a href="http://www.cnblogs.com/kissdodog/archive/2013/01/29/2882195.html">3. C#集合(12)</a></li><li><a href="http://www.cnblogs.com/kissdodog/archive/2013/05/07/3064895.html">4. System.Web.Caching.Cache类  缓存 各种缓存依赖(12)</a></li><li><a href="http://www.cnblogs.com/kissdodog/archive/2013/05/04/3060278.html">5. MVC 数据验证(11)</a></li></ul></div>
+</div></div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div class="RecentComment">
+	<div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/kissdodog/archive/2012/12/15/2819025.html">1. jQuery插件之ajaxFileUpload(30)</a></li><li><a href="http://www.cnblogs.com/kissdodog/archive/2013/01/16/2863515.html">2. C#枚举(30)</a></li><li><a href="http://www.cnblogs.com/kissdodog/archive/2013/05/07/3064895.html">3. System.Web.Caching.Cache类  缓存 各种缓存依赖(27)</a></li><li><a href="http://www.cnblogs.com/kissdodog/p/3398523.html">4. SQL Server Profiler工具(26)</a></li><li><a href="http://www.cnblogs.com/kissdodog/p/3297894.html">5. 逻辑数据库设计 - 单纯的树(递归关系数据)(26)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+	
+</td><td id="main">
+	
+<div id="post_detail">
+<div class="post">
+			<div class="postTitle">
+				<a id="cb_post_title_url" href="http://www.cnblogs.com/kissdodog/archive/2013/03/28/2986026.html">线程池之ThreadPool类与辅助线程 - &lt;第二篇&gt;</a>
+			</div>
+	
+	<div class="postText">
+		<div id="cnblogs_post_body"><h1 style="background-color: #000; font-size: 24px;"><span style="color: #ffffff;">一、CLR线程池</span></h1>
+<p>　　管理线程开销最好的方式：</p>
+<ol>
+<li>尽量少的创建线程并且能将线程反复利用(线程池初始化时没有线程，有程序请求线程则创建线程)；</li>
+<li>最好不要销毁而是挂起线程达到避免性能损失(线程池创建的线程完成任务后以挂起状态回到线程池中，等待下次请求)；</li>
+<li>通过一个技术达到让应用程序一个个执行工作，类似于一个队列(<span>多个应用程序请求线程池，线程池会将各个应用程序排队处理</span>)；</li>
+<li>如果某一线程长时间挂起而不工作的话，需要彻底销毁并且释放资源(线程池自动监控长时间不工作的线程，自动销毁)；</li>
+<li>如果线程不够用的话能够创建线程，并且用户可以自己定制最大线程创建的数量(当队列过长，线程池里的线程不够用时，线程池不会坐视不理)；</li>
+</ol>
+<p>　　微软早就替我们想到了，为我们实现了线程池。</p>
+<p>　　CLR线程池并不会在CLR初始化时立即建立线程，而是在应用程序要创建线程来运行任务时，线程池才初始化一个线程。</p>
+<p>　<span style="color: #0000ff;">　<strong>线程池初始化时是没有线程的，线程池里的。线程的初始化与其他线程一样，但是在完成任务以后，该线程不会自行销毁，而是以挂起的状态返回到线程池。直到应用程序再次向线程池发出请求时，线程池里挂起的线程就会再度激活执行任务。</strong></span></p>
+<p>　　这样既节省了建立线程所造成的性能损耗，也可以让多个任务反复重用同一线程，从而在应用程序生存期内节约大量开销。</p>
+<div class="cnblogs_code">
+<pre><span style="color: #ff0000; font-size: 16px;"><strong>通过CLR线程池所建立的线程总是默认为后台线程，优先级数为ThreadPriority.Normal</strong>。</span></pre>
+</div>
+<h1 style="background-color: #000; font-size: 24px;"><span style="color: #ffffff;">二、工作者线程与I/O线程</span></h1>
+<p>　　CLR线程池分为工作者线程(workerThreads)与I/O线程(completionPortThreads)两种:</p>
+<ul>
+<li>工作者线程是主要用作管理CLR内部对象的运作，<strong>通常用于计算密集的任务。</strong></li>
+<li>I/O(Input/Output)线程主要用于与外部系统交互信息，如输入输出，CPU仅需在任务开始的时候，将任务的参数传递给设备，然后启动硬件设备即可。等任务完成的时候，CPU收到一个通知，一般来说是一个硬件的中断信号，此时CPU继续后继的处理工作。在处理过程中，CPU是不必完全参与处理过程的，如果正在运行的线程不交出CPU的控制权，那么线程也只能处于等待状态，即使操作系统将当前的CPU调度给其他线程，此时线程所占用的空间还是被占用，而并没有CPU处理这个线程，可能出现线程资源浪费的问题。如果这是一个网络服务程序，每一个网络连接都使用一个线程管理，可能出现大量线程都在等待网络通信，随着网络连接的不断增加，处于等待状态的线程将会很消耗尽所有的内存资源。可以考虑使用线程池解决这个问题。</li>
+</ul>
+<p>　　线程池的最大值一般默认为1000、2000。当大于此数目的请求时，将保持排队状态，直到线程池里有线程可用。</p>
+<p>　　使用CLR线程池的工作者线程一般有两种方式：</p>
+<ul>
+<li>通过ThreadPool.QueueUserWorkItem()方法；</li>
+<li>通过委托；</li>
+</ul>
+<p>　　要注意，不论是通过ThreadPool.QueueUserWorkItem()还是委托，调用的都是线程池里的线程。</p>
+<h1 style="background-color: #000; font-size: 24px;"><span style="color: #ffffff;">三、ThreadPool类常用方法</span></h1>
+<p>　　通过以下两个方法可以读取和设置CLR线程池中工作者线程与I/O线程的最大线程数。</p>
+<ol>
+<li>ThreadPool.GetMax(out in workerThreads,out int completionPortThreads)；</li>
+<li>ThreadPool.SetMax(int workerThreads,int completionPortThreads)；</li>
+</ol>
+<p>　　若想测试线程池中有多少线程正在投入使用，可以通过ThreadPool.GetAvailableThreads(out in workThreads,out int conoletionPortThreads)方法。</p>
+<table border="0">
+<tbody>
+<tr style="background-color: #dcdcdc;">
+<td>方法</td>
+<td>说明</td>
+</tr>
+<tr>
+<td>GetAvailableThreads</td>
+<td>剩余空闲线程数</td>
+</tr>
+<tr>
+<td>GetMaxThreads</td>
+<td>最多可用线程数，所有大于此数目的请求将保持排队状态，直到线程池线程变为可用</td>
+</tr>
+<tr>
+<td>GetMinThreads</td>
+<td>检索线程池在新请求预测中维护的空闲线程数。</td>
+</tr>
+<tr>
+<td>QueueUserWorkItem</td>
+<td>启动线程池里得一个线程(队列的方式，如线程池暂时没空闲线程，则进入队列排队)</td>
+</tr>
+<tr>
+<td>SetMaxThreads</td>
+<td>设置线程池中的最大线程数</td>
+</tr>
+<tr>
+<td>SetMinThreads</td>
+<td>设置线程池最少需要保留的线程数</td>
+</tr>
+</tbody>
+</table>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: #0000ff;">class</span><span style="color: #000000;"> Program
+    {
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> Main(<span style="color: #0000ff;">string</span><span style="color: #000000;">[] args)
+        {
+            </span><span style="color: #0000ff;">int</span> i = <span style="color: #800080;">0</span><span style="color: #000000;">;
+            </span><span style="color: #0000ff;">int</span> j = <span style="color: #800080;">0</span><span style="color: #000000;">;
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">前面是辅助(也就是所谓的工作者)线程，后面是I/O线程</span>
+            ThreadPool.GetMaxThreads(<span style="color: #0000ff;">out</span> i, <span style="color: #0000ff;">out</span><span style="color: #000000;"> j);
+            Console.WriteLine(i.ToString() </span>+ <span style="color: #800000;">"</span>   <span style="color: #800000;">"</span> + j.ToString()); <span style="color: #008000;">//</span><span style="color: #008000;">默认都是1000
+
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">获取空闲线程，由于现在没有使用异步线程，所以为空</span>
+            ThreadPool.GetAvailableThreads(<span style="color: #0000ff;">out</span> i, <span style="color: #0000ff;">out</span><span style="color: #000000;"> j);
+            Console.WriteLine(i.ToString() </span>+ <span style="color: #800000;">"</span>   <span style="color: #800000;">"</span> + j.ToString()); <span style="color: #008000;">//</span><span style="color: #008000;">默认都是1000</span>
+<span style="color: #000000;">
+            Console.ReadKey();
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<h1 style="background-color: #000; font-size: 24px;"><span style="color: #ffffff;">四、各种调用线程池线程的方法</span></h1>
+<p>　　<span style="color: #0000ff;"><strong><span style="font-size: 18px;">1、通过QueueUserWorkItem启动工作者线程</span></strong></span></p>
+<p>　　ThreadPool线程池中有两个重载的静态方法可以直接启动工作者线程：</p>
+<ul>
+<li>　　ThreadPool.QueueUserWorkItem(waitCallback)；</li>
+<li>　　ThreadPool.QueueUserWorkItem(waitCallback,Object)；</li>
+</ul>
+<p>　　先把WaitCallback委托指向一个带有Object参数的无返回值方法，再使用ThreadPool.QueueUserWorkItem(WaitCallback)就可以一步启动此方法，此时异步方法的参数被视为null。</p>
+<p>　　下面来试下用QueueUserWorkItem启动线程池里的一个线程。注意哦，由于是一直存在于线程池，所以不用new Thread()。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: #0000ff;">class</span><span style="color: #000000;"> Program
+    {
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> Main(<span style="color: #0000ff;">string</span><span style="color: #000000;">[] args)
+        {
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">工作者线程最大数目，I/O线程的最大数目</span>
+            ThreadPool.SetMaxThreads(<span style="color: #800080;">1000</span>, <span style="color: #800080;">1000</span><span style="color: #000000;">);   
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">启动工作者线程</span>
+            ThreadPool.QueueUserWorkItem(<span style="color: #0000ff;">new</span><span style="color: #000000;"> WaitCallback(RunWorkerThread));
+
+            Console.ReadKey();
+        }
+
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> RunWorkerThread(<span style="color: #0000ff;">object</span><span style="color: #000000;"> state)
+        {
+            Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">RunWorkerThread开始工作</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+            Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">工作者线程启动成功!</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　输出：</p>
+<p>　　<img style="border: 1px solid black;" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/26133634-eec3321035af45c480f1ace1050fd5be.jpg" alt="" width="205" height="46"></p>
+<p>　　使用第二个重载方法ThreadPool.QueueUserWorkItem(WaitCallback,object)方法可以把object对象作为参数传送到回调函数中。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: #0000ff;">class</span><span style="color: #000000;"> Program
+    {
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> Main(<span style="color: #0000ff;">string</span><span style="color: #000000;">[] args)
+        {
+            Person p </span>= <span style="color: #0000ff;">new</span> Person(<span style="color: #800080;">1</span>,<span style="color: #800000;">"</span><span style="color: #800000;">刘备</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">启动工作者线程</span>
+            ThreadPool.QueueUserWorkItem(<span style="color: #0000ff;">new</span><span style="color: #000000;"> WaitCallback(RunWorkerThread), p);
+            Console.ReadKey();
+        }
+
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> RunWorkerThread(<span style="color: #0000ff;">object</span><span style="color: #000000;"> obj)
+        {
+            Thread.Sleep(</span><span style="color: #800080;">200</span><span style="color: #000000;">);
+            Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">线程池线程开始!</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+            Person p </span>= obj <span style="color: #0000ff;">as</span><span style="color: #000000;"> Person;
+            Console.WriteLine(p.Name);
+        }
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> Person
+    {
+        </span><span style="color: #0000ff;">public</span> Person(<span style="color: #0000ff;">int</span> id,<span style="color: #0000ff;">string</span> name) { Id = id; Name =<span style="color: #000000;"> name; }
+        </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">int</span> Id { <span style="color: #0000ff;">get</span>; <span style="color: #0000ff;">set</span><span style="color: #000000;">; }
+        </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">string</span> Name { <span style="color: #0000ff;">get</span>; <span style="color: #0000ff;">set</span><span style="color: #000000;">; }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p><span style="line-height: 1.5;">　　输出结果如下：</span></p>
+<p>　　<img style="border: 1px solid black;" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/26134903-ff5ae44b1eb04d1a89f9c0511937d801.jpg" alt="" width="139" height="58"></p>
+<p>　　通过ThreadPool.QueueUserWork启动工作者线程非常方便，但是WaitCallback委托指向的必须是一个带有object参数的无返回值方法。所以这个方法启动的工作者线程仅仅适合于带单个参数和无返回值的情况。</p>
+<p>　　那么如果要传递多个参数和要有返回值又应该怎么办呢？那就只有通过委托了。</p>
+<p>　　<span style="color: #0000ff;"><strong><span style="font-size: 18px;">2、BeginInvoke与EndInvoke委托异步调用线程</span></strong></span></p>
+<p>　　异步调用委托的步骤如下：</p>
+<ol>
+<li>建立一个委托对象，通过<span style="color: #0000ff;"><strong>IAsyncResult</strong> </span>BeginInvoke(string name,AsyncCallback callback,object state)异步调用委托方法，<strong style="line-height: 1.5;"><span style="color: #0000ff;">BeginInvoke方法除最后的两个参数外，其他参数都是与方法参数相对应的。</span></strong></li>
+<li>利用EndInvoke(IAsyncResult--上一步BeginInvoke返回的对象)方法就可以结束异步操作，获取委托的运行结果。</li>
+</ol>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: #0000ff;">class</span><span style="color: #000000;"> Program
+    {
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">除了最后两个参数，前面的都是你可定义的</span>
+        <span style="color: #0000ff;">delegate</span> <span style="color: #0000ff;">string</span> MyDelegate(<span style="color: #0000ff;">string</span> name,<span style="color: #0000ff;">int</span><span style="color: #000000;"> age);
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> Main(<span style="color: #0000ff;">string</span><span style="color: #000000;">[] args)
+        {
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">建立委托</span>
+            MyDelegate myDelegate = <span style="color: #0000ff;">new</span><span style="color: #000000;"> MyDelegate(GetString);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">异步调用委托，除最后两个参数外，前面的参数都可以传进去</span>
+            IAsyncResult result = myDelegate.BeginInvoke(<span style="color: #800000;">"</span><span style="color: #800000;">刘备</span><span style="color: #800000;">"</span>,<span style="color: #800080;">22</span>, <span style="color: #0000ff;">null</span>, <span style="color: #0000ff;">null</span><span style="color: #000000;">);　　<strong><span style="color: #0000ff; font-size: 18px;">//IAsynResult还能轮询判断，功能不弱</span></strong>
+
+            Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">主线程继续工作!</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">调用EndInvoke(IAsyncResult)获取运行结果，一旦调用了EndInvoke，即使结果还没来得及返回，主线程也阻塞等待了
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">注意获取返回值的方式</span>
+            <span style="color: #0000ff;">string</span> data =<span style="color: #000000;"> myDelegate.EndInvoke(result);
+            Console.WriteLine(data);
+
+            Console.ReadKey();
+        }
+
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">string</span> GetString(<span style="color: #0000ff;">string</span> name, <span style="color: #0000ff;">int</span><span style="color: #000000;"> age)
+        {
+            Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">我是不是线程池线程</span><span style="color: #800000;">"</span> +<span style="color: #000000;"> Thread.CurrentThread.IsThreadPoolThread);
+            Thread.Sleep(</span><span style="color: #800080;">2000</span><span style="color: #000000;">);
+            </span><span style="color: #0000ff;">return</span> <span style="color: #0000ff;">string</span>.Format(<span style="color: #800000;">"</span><span style="color: #800000;">我是{0}，今年{1}岁!</span><span style="color: #800000;">"</span><span style="color: #000000;">,name,age);
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　输出如下：</p>
+<p>　　<img style="border: 1px solid black;" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/26143300-9313884020944da88b277cc4ddc923f7.jpg" alt="" width="189" height="72"></p>
+<p>　　这种方法有一个缺点，就是不知道异步操作什么时候执行完，什么时候开始调用EndInvoke，因为一旦EndInvoke主线程就会处于阻塞等待状态。</p>
+<p>　　<span style="font-size: 18px; color: #0000ff;"><strong>3、IAsyncResult轮询</strong></span></p>
+<p>　　为了克服上面提到的缺点，此时可以好好利用IAsyncResult提高主线程的工作性能，IAsyncResult有如下成员。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">interface</span><span style="color: #000000;"> IAsyncResult
+{
+　　</span><span style="color: #0000ff;">object</span> AsyncState {<span style="color: #0000ff;">get</span>;} 　　　　　 <span style="color: #008000;">//</span><span style="color: #008000;">获取用户定义的对象，它限定或包含关于异步操作的信息。</span>
+　　WailHandle AsyncWaitHandle {<span style="color: #0000ff;">get</span>;}  <span style="color: #008000;">//</span><span style="color: #008000;">获取用于等待异步操作完成的 WaitHandle。</span>
+　　<span style="color: #0000ff;">bool</span> CompletedSynchronously {<span style="color: #0000ff;">get</span>;} <span style="color: #008000;">//</span><span style="color: #008000;">获取异步操作是否同步完成的指示。</span>
+　　<span style="color: #0000ff;">bool</span> IsCompleted {<span style="color: #0000ff;">get</span>;} 　　　　　　 <span style="color: #008000;">//</span><span style="color: #008000;">获取异步操作是否已完成的指示。</span>
+}</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　示例如下：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: #0000ff;">class</span><span style="color: #000000;"> Program
+    {
+        </span><span style="color: #0000ff;">delegate</span> <span style="color: #0000ff;">string</span> MyDelegate(<span style="color: #0000ff;">string</span> name,<span style="color: #0000ff;">int</span><span style="color: #000000;"> age);
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> Main(<span style="color: #0000ff;">string</span><span style="color: #000000;">[] args)
+        {
+            MyDelegate myDelegate </span>= <span style="color: #0000ff;">new</span><span style="color: #000000;"> MyDelegate(GetString);
+            IAsyncResult result </span>= myDelegate.BeginInvoke(<span style="color: #800000;">"</span><span style="color: #800000;">刘备</span><span style="color: #800000;">"</span>,<span style="color: #800080;">22</span>, <span style="color: #0000ff;">null</span>, <span style="color: #0000ff;">null</span><span style="color: #000000;">);
+
+            Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">主线程继续工作!</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">比上个例子，只是利用多了一个IsCompleted属性，来判断异步线程是否完成</span>
+           <span style="color: #0000ff;"><strong><span style="font-size: 18px;"> while (!</span></strong></span><span style="color: #000000;"><span style="color: #0000ff;"><strong><span style="font-size: 18px;">result.IsCompleted)</span></strong></span>
+            {
+                Thread.Sleep(</span><span style="color: #800080;">500</span><span style="color: #000000;">);          
+                Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">异步线程还没完成，主线程干其他事!</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+            }
+
+            </span><span style="color: #0000ff;">string</span> data =<span style="color: #000000;"> myDelegate.EndInvoke(result);
+            Console.WriteLine(data);
+
+            Console.ReadKey();
+        }
+
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">string</span> GetString(<span style="color: #0000ff;">string</span> name, <span style="color: #0000ff;">int</span><span style="color: #000000;"> age)
+        {
+            Thread.Sleep(</span><span style="color: #800080;">2000</span><span style="color: #000000;">);
+            </span><span style="color: #0000ff;">return</span> <span style="color: #0000ff;">string</span>.Format(<span style="color: #800000;">"</span><span style="color: #800000;">我是{0}，今年{1}岁!</span><span style="color: #800000;">"</span><span style="color: #000000;">,name,age);
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　输出如下：</p>
+<p>　　<img style="border: 1px solid black;" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/26150431-849a71533807486eaf4b0a8db6b7fd1c.jpg" alt="" width="292" height="116"></p>
+<p>　　以上例子，除了IsCompleted属性外，还可以使用AsyncWaitHandle如下3个方法实现同样轮询判断效果：</p>
+<ul>
+<li>WaitOne：判断单个异步线程是否完成；</li>
+<li>WaitAny：判断是否异步线程是否有指定数量个已完成；</li>
+<li>WaitAll：判断是否所有的异步线程已完成；</li>
+</ul>
+<p>　　WaitOne：</p>
+<div class="cnblogs_code">
+<pre>  <span style="color: #008000;">//</span><span style="color: #008000;">比上个例子，判断条件由IsCompleted属性换成了AsyncWaitHandle，仅此而已</span>
+  <span style="color: #0000ff;">while</span> (!result.AsyncWaitHandle.WaitOne(<span style="color: #800080;">200</span><span style="color: #000000;">))
+  {
+      Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">异步线程没完，主线程继续干活！</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+  }</span></pre>
+</div>
+<p>　　WaitAny：</p>
+<div class="cnblogs_code">
+<pre>  <span style="color: #008000;">//</span><span style="color: #008000;">是否完成了指定数量</span>
+  WaitHandle[] waitHandleList = <span style="color: #0000ff;">new</span><span style="color: #000000;"> WaitHandle[] { result.AsyncWaitHandle };
+  </span><span style="color: #0000ff;">while</span> (WaitHandle.WaitAny(waitHandleList, <span style="color: #800080;">200</span>) &gt; <span style="color: #800080;">0</span><span style="color: #000000;">)
+  {
+      Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">异步线程完成数未大于0，主线程继续甘其他事!</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+  }</span></pre>
+</div>
+<p><span style="line-height: 1.5;">　　</span><span style="line-height: 1.5;">WaitAll：</span></p>
+<div class="cnblogs_code">
+<pre>  WaitHandle[] waitHandleList = <span style="color: #0000ff;">new</span><span style="color: #000000;"> WaitHandle[] { result.AsyncWaitHandle };
+  </span><span style="color: #008000;">//</span><span style="color: #008000;">是否全部异步线程完成</span>
+  <span style="color: #0000ff;">while</span> (!WaitHandle.WaitAll(waitHandleList, <span style="color: #800080;">200</span><span style="color: #000000;">))
+  {
+      Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">异步线程未全部完成，主线程继续干其他事!</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+  }</span></pre>
+</div>
+<p><strong>　　<span style="font-size: 18px; color: #0000ff;">4、IAsyncResult回调函数</span></strong></p>
+<p>　　使用轮询方式来检测异步方法的状态非常麻烦，而且影响了主线程，效率不高。能不能异步线程完成了就直接调用实现定义好的处理函数呢？</p>
+<p>　　有，还是强大的IAsyncResult对象。</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>    <span style="color: #0000ff;">class</span><span style="color: #000000;"> Program
+    {
+        </span><span style="color: #0000ff;">delegate</span> <span style="color: #0000ff;">string</span> MyDelegate(<span style="color: #0000ff;">string</span> name, <span style="color: #0000ff;">int</span><span style="color: #000000;"> age);
+
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> Main(<span style="color: #0000ff;">string</span><span style="color: #000000;">[] args)
+        {
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">建立委托</span>
+            MyDelegate myDelegate = <span style="color: #0000ff;">new</span><span style="color: #000000;"> MyDelegate(GetString);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">倒数第二个参数，委托中绑定了完成后的回调方法</span>
+            IAsyncResult result1 = myDelegate.BeginInvoke(<span style="color: #800000;">"</span><span style="color: #800000;">刘备</span><span style="color: #800000;">"</span>,<span style="color: #800080;">23</span>, <span style="color: #0000ff; font-size: 18px;"><strong>new AsyncCallback(Completed)</strong></span>, <span style="color: #0000ff;">null</span><span style="color: #000000;">);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">主线程可以继续工作而不需要等待</span>
+            Console.WriteLine(<span style="color: #800000;">"</span><span style="color: #800000;">我是主线程，我干我的活，不再理你！</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+            Thread.Sleep(</span><span style="color: #800080;">5000</span><span style="color: #000000;">);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">Console.ReadKey();</span>
+<span style="color: #000000;">        }
+
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">string</span> GetString(<span style="color: #0000ff;">string</span> name, <span style="color: #0000ff;">int</span><span style="color: #000000;"> age)
+        {
+            Thread.CurrentThread.Name </span>= <span style="color: #800000;">"</span><span style="color: #800000;">异步线程</span><span style="color: #800000;">"</span><span style="color: #000000;">;
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">注意，如果不设置为前台线程，则主线程完成后就直接卸载程序了
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">Thread.CurrentThread.IsBackground = false;</span>
+            Thread.Sleep(<span style="color: #800080;">2000</span><span style="color: #000000;">);
+            </span><span style="color: #0000ff;">return</span> <span style="color: #0000ff;">string</span>.Format(<span style="color: #800000;">"</span><span style="color: #800000;">我是{0}，今年{1}岁!</span><span style="color: #800000;">"</span><span style="color: #000000;">, name, age);
+        }
+
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">供异步线程完成回调的方法</span>
+        <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"><span style="color: #0000ff;"><strong><span style="font-size: 18px;"> Completed</span></strong></span>(IAsyncResult result)
+        {
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">获取委托对象，调用EndInvoke方法获取运行结果</span>
+            AsyncResult _result =<span style="color: #000000;"> (AsyncResult)result;
+            MyDelegate myDelegaate </span>=<span style="color: #000000;"> (MyDelegate)_result.AsyncDelegate;
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">获得参数</span>
+            <span style="color: #0000ff;">string</span> data =<span style="color: #000000;"> myDelegaate.EndInvoke(_result);
+            Console.WriteLine(data);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">异步线程执行完毕</span>
+            Console.WriteLine(<span style="color: #800000;">"</span><span style="color: #800000;">异步线程完成咯！</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+            Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">回调函数也是由</span><span style="color: #800000;">"</span> + Thread.CurrentThread.Name + <span style="color: #800000;">"</span><span style="color: #800000;">调用的！</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+        }
+    }</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p><span style="line-height: 1.5;">　　输出如下：</span></p>
+<p>　　<img style="border: 1px solid black;" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/26154542-b933b407ade54b7cad55759ab3701f0d.jpg" alt="" width="281" height="84"></p>
+<p><span>　　注意：</span></p>
+<ol>
+<li><span style="color: #0000ff;"><strong><span style="font-size: 18px;">回调函数依然是在辅助线程中执行的，这样就不会影响主线程的运行。</span></strong></span></li>
+<li><span style="color: #0000ff;"><strong><span style="font-size: 18px;">线程池的线程默认是后台线程。但是如果主线程比辅助线程优先完成，那么程序已经卸载，回调函数未必会执行。如果不希望丢失回调函数中的操作，要么把异步线程设为前台线程，要么确保主线程将比辅助线程迟完成。</span></strong></span></li>
+</ol>
+<p>　　到目前为止，BeginInvoke("刘备",23, new AsyncCallback(Completed), null)还有最后一个参数没用过的。那么最后一个参数是用来干什么？传参：</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: #0000ff;">namespace</span><span style="color: #000000;"> 控制台___学习测试
+{
+    </span><span style="color: #0000ff;">class</span><span style="color: #000000;"> Program
+    {
+        </span><span style="color: #0000ff;">delegate</span> <span style="color: #0000ff;">string</span> MyDelegate(<span style="color: #0000ff;">string</span> name, <span style="color: #0000ff;">int</span><span style="color: #000000;"> age);
+
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span> Main(<span style="color: #0000ff;">string</span><span style="color: #000000;">[] args)
+        {
+            Person p </span>= <span style="color: #0000ff;">new</span> Person(<span style="color: #800080;">2</span>,<span style="color: #800000;">"</span><span style="color: #800000;">关羽</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">建立委托</span>
+            MyDelegate myDelegate = <span style="color: #0000ff;">new</span><span style="color: #000000;"> MyDelegate(GetString);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">最后一个参数的作用，原来是用来传参的</span>
+            <span style="color: #0000ff;">IAsyncResult result1 = myDelegate.BeginInvoke("刘备", 23, new AsyncCallback(Completed), <strong><span style="font-size: 18px;">p</span></strong>);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">主线程可以继续工作而不需要等待</span>
+            Console.WriteLine(<span style="color: #800000;">"</span><span style="color: #800000;">我是主线程，我干我的活，不再理你！</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+            Console.ReadKey();
+        }
+
+        </span><span style="color: #0000ff;">static</span> <span style="color: #0000ff;">string</span> GetString(<span style="color: #0000ff;">string</span> name, <span style="color: #0000ff;">int</span><span style="color: #000000;"> age)
+        {
+            Thread.CurrentThread.Name </span>= <span style="color: #800000;">"</span><span style="color: #800000;">异步线程</span><span style="color: #800000;">"</span><span style="color: #000000;">;
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">注意，如果不设置为前台线程，则主线程完成后就直接卸载程序了</span>
+            Thread.CurrentThread.IsBackground = <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+            Thread.Sleep(</span><span style="color: #800080;">2000</span><span style="color: #000000;">);
+            </span><span style="color: #0000ff;">return</span> <span style="color: #0000ff;">string</span>.Format(<span style="color: #800000;">"</span><span style="color: #800000;">我是{0}，今年{1}岁!</span><span style="color: #800000;">"</span><span style="color: #000000;">, name, age);
+        }
+
+        </span><span style="color: #008000;">//</span><span style="color: #008000;">供异步线程完成回调的方法</span>
+        <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> Completed(IAsyncResult result)
+        {
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">获取委托对象，调用EndInvoke方法获取运行结果</span>
+            AsyncResult _result =<span style="color: #000000;"> (AsyncResult)result;
+            MyDelegate myDelegaate </span>=<span style="color: #000000;"> (MyDelegate)_result.AsyncDelegate;
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">获得参数</span>
+            <span style="color: #0000ff;">string</span> data =<span style="color: #000000;"> myDelegaate.EndInvoke(_result);
+            Console.WriteLine(data);
+
+            <span style="color: #0000ff;"><strong><span style="font-size: 18px;">Person p </span></strong></span></span><span style="color: #0000ff;"><strong><span style="font-size: 18px;">= result.AsyncState as</span></strong></span><span style="color: #000000;"><span style="color: #0000ff;"><strong><span style="font-size: 18px;"> Person;</span></strong></span>
+            Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">传过来的参数是：</span><span style="color: #800000;">"</span> +<span style="color: #000000;"> p.Name);
+            </span><span style="color: #008000;">//</span><span style="color: #008000;">异步线程执行完毕</span>
+            Console.WriteLine(<span style="color: #800000;">"</span><span style="color: #800000;">异步线程完成咯！</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+            Console.WriteLine(</span><span style="color: #800000;">"</span><span style="color: #800000;">回调函数也是由</span><span style="color: #800000;">"</span> + Thread.CurrentThread.Name + <span style="color: #800000;">"</span><span style="color: #800000;">调用的！</span><span style="color: #800000;">"</span><span style="color: #000000;">);
+        }
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> Person
+    {
+        </span><span style="color: #0000ff;">public</span> Person(<span style="color: #0000ff;">int</span> id, <span style="color: #0000ff;">string</span><span style="color: #000000;"> name)
+        {
+            Id </span>=<span style="color: #000000;"> id;
+            Name </span>=<span style="color: #000000;"> name;
+        }
+
+        </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> Id
+        {
+            </span><span style="color: #0000ff;">get</span><span style="color: #000000;">;
+            </span><span style="color: #0000ff;">set</span><span style="color: #000000;">;
+        }
+
+        </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">string</span><span style="color: #000000;"> Name
+        {
+            </span><span style="color: #0000ff;">get</span><span style="color: #000000;">;
+            </span><span style="color: #0000ff;">set</span><span style="color: #000000;">;
+        }
+    }
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　输出如下：</p>
+<p>　　<img style="border: 1px solid black;" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/26155917-aaeac1b1e99e45eaac3ca608f3b6bc59.jpg" alt="" width="298" height="100"></p></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/kissdodog/category/464176.html" target="_blank">.Net模块：多线程</a></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(2986026,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;8ec8d629-bd06-e111-b7b9-842b2b196315&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/kissdodog/" target="_blank"><img src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/20140125113312.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/kissdodog/">逆心</a><br>
+            <a href="http://home.cnblogs.com/u/kissdodog/followees">关注 - 31</a><br>
+            <a href="http://home.cnblogs.com/u/kissdodog/followers">粉丝 - 1999</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;8ec8d629-bd06-e111-b7b9-842b2b196315&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(2986026,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">5</span>
+    </div>
+    <div class="buryit" onclick="votePost(2986026,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/kissdodog/archive/2013/03/26/2983755.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/kissdodog/archive/2013/03/26/2983755.html" title="发布于2013-03-26 23:57">线程初步了解 - &lt;第一篇&gt;</a><br><a href="http://www.cnblogs.com/kissdodog/archive/2013/03/29/2988212.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/kissdodog/archive/2013/03/29/2988212.html" title="发布于2013-03-29 09:19">线程池 异步I/O线程 &lt;第三篇&gt;</a><br></div>
+</div>
+
+
+	</div>
+	
+	<div class="postfoot">
+		posted on <span id="post-date">2013-03-28 09:25</span> <a href="http://www.cnblogs.com/kissdodog/">逆心</a> 阅读(<span id="post_view_count">8370</span>) 评论(<span id="post_comment_count">0</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=2986026" rel="nofollow">编辑</a> <a href="http://www.cnblogs.com/kissdodog/archive/2013/03/28/2986026.html#" onclick="AddToWz(2986026);return false;">收藏</a>
+	</div>
+</div>
+<script type="text/javascript">var allowComments=true,cb_blogId=113280,cb_entryId=2986026,cb_blogApp=currentBlogApp,cb_blogUserGuid='8ec8d629-bd06-e111-b7b9-842b2b196315',cb_entryCreatedDate='2013/3/28 9:25:00';loadViewCount(cb_entryId);</script>
+
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="http://www.cnblogs.com/kissdodog/archive/2013/03/28/2986026.html#" onclick="return RefreshPage();">刷新页面</a><a href="http://www.cnblogs.com/kissdodog/archive/2013/03/28/2986026.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank">【推荐】50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://cloud.tencent.com/solution/la?fromSource=gwzcw.485446.485446.485446" target="_blank">【推荐】腾讯云 十分钟定制你的第一个微信小程序</a><br><a href="http://www.gcpowertools.com.cn/products/activereports_overview.htm?utm_source=cnblogs&amp;utm_medium=blogpage&amp;utm_term=bottom&amp;utm_content=AR&amp;utm_campaign=community" target="_blank">【推荐】报表开发有捷径：快速设计轻松集成，数据可视化和交互</a><br></div>
+<div id="opt_under_post"></div>
+<div id="cnblogs_c1" class="c_ad_block"><a href="http://activity.huaweicloud.com/devcloud1024/?utm_source=cnblogs&amp;utm_medium=MediaB&amp;utm_campaign=%E5%8D%8E%E4%B8%BA%E4%BA%91-10%E6%9C%88%E5%B9%BF%E5%91%8A%E6%8A%95%E6%94%BE&amp;utm_content=%E5%8D%9A%E5%AE%A2%E5%9B%AD%E5%86%85%E9%A1%B5C1%E7%9F%A9%E5%BD%A2&amp;utm_term=%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E4%BA%91-1024%E8%AE%BA%E5%9D%9B%E6%B4%BB%E5%8A%A8" target="_blank"><img width="300" height="250" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/24442-20171015214114324-1153647777.jpg" alt="华为云1016C2"></a></div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/580352/" target="_blank">俞敏洪：我创业24年感悟的3条CEO守则</a><br> ·  <a href="http://news.cnblogs.com/n/580351/" target="_blank">Ins CTO：内部提拔和外部聘请，如何才能找到合适的管理者？</a><br> ·  <a href="http://news.cnblogs.com/n/580326/" target="_blank">【观点】为什么我不看好搜狗？</a><br> ·  <a href="http://news.cnblogs.com/n/580333/" target="_blank">北斗卫星导航系统首次在国产民机上应用试飞取得成功</a><br> ·  <a href="http://news.cnblogs.com/n/580337/" target="_blank">程守宗：黑莓已经完成转型 公司脱离“危险期”</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="cnblogs_c2" class="c_ad_block"><a href="http://click.aliyun.com/m/22446/" target="_blank"><img width="468" height="60" src="./线程池之ThreadPool类与辅助线程 - _第二篇_ - 逆心 - 博客园_files/24442-20171001085719794-417760373.jpg" alt="阿里云1001"></a></div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/579480/" target="_blank">实用VPC虚拟私有云设计原则</a><br> ·  <a href="http://kb.cnblogs.com/page/576251/" target="_blank">如何阅读计算机科学类的书</a><br> ·  <a href="http://kb.cnblogs.com/page/578103/" target="_blank">Google 及其云智慧</a><br> ·  <a href="http://kb.cnblogs.com/page/575829/" target="_blank">做到这一点，你也可以成为优秀的程序员</a><br> ·  <a href="http://kb.cnblogs.com/page/566880/" target="_blank">写给立志做码农的大学生</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+
+
+</td></tr>
+</tbody></table>
+
+<p id="footer">
+	Copyright @
+	逆心<br>
+	Powered by:
+	<a href="http://scottwater.com/blog" target="_blank">.Text</a> and 
+	<a href="http://asp.net/" target="_blank">ASP.NET</a>
+	<br>
+	Theme by: <a href="http://www.dotnetmonster.com/" target="_blank">.NET Monster</a>
+</p>
+
+
+<!--PageEndHtml Block Begin-->
+<div style="margin:0 auto; text-align:center; "><a href="http://www.xiaojiaju8.com/" style="width: 50px; margin: 0 auto;">家居</a></div>
+<!--PageEndHtml Block End-->
+
+
+</body></html>
